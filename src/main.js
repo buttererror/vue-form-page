@@ -3,6 +3,10 @@ import App from './App.vue'
 import 'es6-promise/auto'
 import store from './vuex';
 
+import VModal from 'vue-js-modal'
+
+Vue.use(VModal)
+
 Vue.config.productionTip = false
 
 new Vue({
