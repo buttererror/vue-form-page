@@ -1,16 +1,16 @@
 <template>
-     <modal name="youtube-link"
+     <modal name="vimeo-link"
             classes="modal-container"
             height="auto"
 
      >
           <div class="container">
                <header class="text-center">
-                    <h1>YouTube link</h1>
+                    <h1>Vimeo link</h1>
                </header>
                <form>
                     <input type="text" class="form-control" @keyup.enter="hideModal"
-                           id="youtube-link" placeholder="Put a youTube link" v-model.trim="videoLink">
+                           id="vimeo-link" placeholder="Put a Vimeo link" v-model.trim="videoLink">
                </form>
                <div class="row mt-4 justify-content-end">
                     <div class="col-4 text-right">
@@ -20,11 +20,12 @@
 
           </div>
      </modal>
+
 </template>
 
 <script>
    export default {
-      name: "youtube-link-modal",
+      name: "Vimeo-link-modal",
       computed: {
          videoLink: {
             get() {
@@ -33,21 +34,18 @@
             set(url) {
                this.$store.commit("updateVideo", {prop: "video_url", value: url});
             }
-         },
+         }
 
       },
       methods: {
          hideModal() {
-            this.$modal.hide("youtube-link");
+            this.$modal.hide("vimeo-link");
          }
       }
+
    }
 </script>
 
-<style>
-     .modal-container {
-          padding: 20px;
-          background: white;
-     }
+<style scoped>
 
 </style>

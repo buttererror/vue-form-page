@@ -2,6 +2,10 @@ import Vue from 'vue'
 import App from './App.vue'
 import 'es6-promise/auto'
 import store from './vuex';
+window.moment = require('moment');
+import VueSimpleAlert from "vue-simple-alert";
+
+Vue.use(VueSimpleAlert);
 
 import VModal from 'vue-js-modal'
 
