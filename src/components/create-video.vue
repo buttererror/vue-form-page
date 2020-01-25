@@ -9,24 +9,30 @@
                     <form>
                          <div class="form-group">
                               <label for="title">Title</label>
-                              <input type="text" class="form-control" v-model.trim="title" id="title">
+                              <input type="text" class="form-control"
+                                     v-model.trim="title" id="title">
                          </div>
                          <div class="form-check">
-                              <input class="form-check-input" type="checkbox" v-model="allowDownload" id="allow-download">
+                              <input class="form-check-input" type="checkbox" v-model="allowDownload"
+                                     id="allow-download">
                               <label class="form-check-label" for="allow-download">
                                    Allow download for students
                               </label>
                          </div>
                          <div class="form-group">
                               <label for="description">Description</label>
-                              <textarea class="form-control" id="description" v-model.trim="description" rows="3"></textarea>
+                              <textarea class="form-control" id="description" v-model.trim="description"
+                                        rows="3"></textarea>
                          </div>
                          <div class="form-group upload-container">
                               <input type="file" class="form-control-file custom-file"
                                      @change="processFile" accept="video/*">
-                              <span class="icon mr-4"><a href="#" @click.prevent="openUrlModal('file')"><img src="../assets/upload.png"></a></span>
-                              <span class="icon mr-4"><a href="#" @click.prevent="openUrlModal('youtube')"><img src="../assets/youtube.png"></a></span>
-                              <span class="icon mr-4"><a href="#" @click.prevent="openUrlModal('vimeo')"><img src="../assets/vimeo.png"></a></span>
+                              <span class="icon mr-4"><a href="#" @click.prevent="openUrlModal('file')"><img
+                                        src="../assets/upload.png"></a></span>
+                              <span class="icon mr-4"><a href="#" @click.prevent="openUrlModal('youtube')"><img
+                                        src="../assets/youtube.png"></a></span>
+                              <span class="icon mr-4"><a href="#" @click.prevent="openUrlModal('vimeo')"><img
+                                        src="../assets/vimeo.png"></a></span>
                               <span class="upload-name">{{videoFile ? videoFile.name : videoLink}}</span>
                          </div>
                          <div class="form-group">
@@ -83,13 +89,14 @@
                               <h2 class="h5 mb-0">Share contents with students</h2>
                               <p class="text-danger">* You must choose at least one section</p>
                               <div class="form-check">
-                                   <input class="form-check-input" type="checkbox" value="" id="check-all">
+                                   <input class="form-check-input" type="checkbox" v-model="checkAll" id="check-all">
                                    <label class="form-check-label" for="check-all">
                                         Check all
                                    </label>
                               </div>
                               <div class="form-check" v-for="(student, index) in students" :key="index">
-                                   <input class="form-check-input" type="checkbox" v-model="shareWithStudent[student.id]" :id='`list-${index}`'>
+                                   <input class="form-check-input" type="checkbox"
+                                          v-model="shareWithStudent[student.id]" :id='`list-${index}`'>
                                    <label class="form-check-label" :for='`list-${index}`'>
                                         {{student.name}}
                                    </label>
@@ -132,7 +139,8 @@
             publishingPlaces: ["Public library", "Schools", "Nothing"],
             libraries: '',
             shareWithStudent: {},
-            tags: []
+            tags: [],
+            checkAll: false
 
          }
       },
@@ -223,7 +231,7 @@
                this.$store.commit("updateVideo", {prop: "students", value: students});
             }
          }
-       },
+      },
       methods: {
          processFile(e) {
             this.videoFile = e.target.files[0];
@@ -232,11 +240,11 @@
          },
          openUrlModal(videoType) {
             this.videoType = videoType;
-            if(videoType === "youtube") {
+            if (videoType === "youtube") {
                this.$modal.show("youtube-link");
                return;
             }
-            if(videoType === "vimeo") {
+            if (videoType === "vimeo") {
                this.$modal.show("vimeo-link");
                return;
             }
@@ -262,10 +270,10 @@
       },
       watch: {
          videoType(type) {
-            if(type === "file") {
+            if (type === "file") {
                this.videoLink = null;
                this.videoFile = this.file;
-            }else {
+            } else {
                this.videoFile = null;
             }
          },
@@ -277,7 +285,7 @@
          },
          libraries(libraries) {
             let librariesIds = [];
-            for(let library of libraries) {
+            for (let library of libraries) {
                librariesIds.push(library.id);
             }
             this.$store.commit("updateVideo", {prop: "publish_custom_library", value: librariesIds});
@@ -287,7 +295,7 @@
                console.log("watching")
                let studentsIds = [];
                for (let studentId in students) {
-                  if(students[studentId]) {
+                  if (students[studentId]) {
                      studentsIds.push(studentId);
                   }
                }
@@ -298,6 +306,16 @@
          tags(tags) {
             let tagsString = tags.map((tag) => tag.text);
             this.$store.commit("updateVideo", {prop: "tags", value: tagsString});
+         },
+         checkAll(checked) {
+            console.log("checkAll", checked)
+            let studentsIds = [];
+            for (let student of this.students) {
+               this.shareWithStudent[student.id] = checked;
+               if(checked) studentsIds.push(student.id);
+            }
+            this.studentsIds = studentsIds;
+
          }
       }
    }
@@ -310,6 +328,7 @@
      .upload-container {
           position: relative;
      }
+
      .custom-file {
           opacity: 0;
           top: 0;
@@ -321,7 +340,7 @@
           cursor: pointer;
      }
 
-     .icon i{
+     .icon i {
           font-size: 60px;
      }
 
