@@ -9,8 +9,17 @@
                     <form>
                          <div class="form-group">
                               <label for="title">Title</label>
-                              <input type="text" class="form-control"
-                                     v-model.trim="title" id="title">
+                              <input type="text" class="form-control" :class="{'is-invalid': $v.title.$error}"
+                                     v-model.trim="$v.title.$model" id="title">
+                              <div class="invalid-feedback" v-if="!$v.title.required">
+                                   Field is required
+                              </div>
+                              <div class="invalid-feedback" v-if="!$v.title.minLength">
+                                   Title must have at least {{$v.title.$params.minLength.min}} letters.
+                              </div>
+                              <div class="invalid-feedback" v-if="!$v.title.maxLength">
+                                   Title must have at most {{$v.title.$params.maxLength.max}} letters.
+                              </div>
                          </div>
                          <div class="form-check">
                               <input class="form-check-input" type="checkbox" v-model="allowDownload"
@@ -21,8 +30,13 @@
                          </div>
                          <div class="form-group">
                               <label for="description">Description</label>
-                              <textarea class="form-control" id="description" v-model.trim="description"
+                              <textarea class="form-control" id="description"
+                                        v-model.trim="$v.description.$model"
+                                        :class="{'is-invalid': $v.description.$error}"
                                         rows="3"></textarea>
+                              <div class="invalid-feedback" v-if="!$v.description.maxLength">
+                                   Description must have at most {{$v.description.$params.maxLength.max}} letters.
+                              </div>
                          </div>
                          <div class="form-group upload-container">
                               <input type="file" class="form-control-file custom-file"
@@ -34,14 +48,23 @@
                               <span class="icon mr-4"><a href="#" @click.prevent="openUrlModal('vimeo')"><img
                                         src="../assets/vimeo.png"></a></span>
                               <span class="upload-name">{{videoFile ? videoFile.name : videoLink}}</span>
+                              <span class="invalid" v-if="!$v.videoType.required && $v.videoType.$error">Video is required</span>
                          </div>
                          <div class="form-group">
                               <label>Publish date</label>
                               <datepicker
+                                        :bootstrap-styling="true"
                                         :format="customFormatter"
-                                        input-class="w-100"
-                                        v-model="publishDate"
-                              ></datepicker>
+                                        :input-class="{'w-100': true, 'form-control': true, 'is-invalid': $v.publishDate.$error}"
+                                        v-model="$v.publishDate.$model"
+                              >
+                                   <template slot="afterDateInput" class="animated-placeholder">
+                                        <div class="invalid-feedback" v-if="!$v.publishDate.required">
+                                             Field is required
+                                        </div>
+                                   </template>
+                              </datepicker>
+
                          </div>
                          <div class="form-group">
                               <label>Preparations</label>
@@ -86,18 +109,18 @@
 
                                    </multiselect>
                               </div>
-                              <h2 class="h5 mb-0">Share contents with students</h2>
-                              <p class="text-danger">* You must choose at least one section</p>
-                              <div class="form-check">
-                                   <input class="form-check-input" type="checkbox" v-model="checkAll" id="check-all">
-                                   <label class="form-check-label" for="check-all">
+                              <h2 class="h5 mb-2">Share contents with students</h2>
+                              <!--<p class="text-danger">* You must choose at least one section</p>-->
+                              <div class="custom-control custom-checkbox mb-3">
+                                   <input class="custom-control-input" type="checkbox" v-model="checkAll" id="check-all">
+                                   <label class="custom-control-label" for="check-all">
                                         Check all
                                    </label>
                               </div>
-                              <div class="form-check" v-for="(student, index) in students" :key="index">
-                                   <input class="form-check-input" type="checkbox"
+                              <div class="custom-control custom-checkbox" v-for="(student, index) in students" :key="index">
+                                   <input class="custom-control-input" type="checkbox"
                                           v-model="shareWithStudent[student.id]" :id='`list-${index}`'>
-                                   <label class="form-check-label" :for='`list-${index}`'>
+                                   <label class="custom-control-label" :for='`list-${index}`'>
                                         {{student.name}}
                                    </label>
                               </div>
@@ -121,6 +144,8 @@
    import {mapState} from 'vuex';
    import YoutubeLinkModal from "./modals/youtube-link-modal";
    import VimeoLinkModal from "./modals/Vimeo-link-modal";
+   import { required, minLength, maxLength } from 'vuelidate/lib/validators'
+
 
    export default {
       name: "create-video",
@@ -143,6 +168,27 @@
             checkAll: false
 
          }
+      },
+      validations: {
+         title: {
+            required,
+            minLength: minLength(2),
+            maxLength: maxLength(255)
+         },
+         description: {
+            maxLength: maxLength(1000)
+         },
+         publishDate: {
+            required
+         },
+         videoType: {
+            required
+         }
+      },
+      mounted() {
+         window.bus.$on(() => {
+            this.$v.videoType.$touch();
+         });
       },
       computed: {
          ...mapState({
@@ -239,7 +285,6 @@
             this.videoType = "file";
          },
          openUrlModal(videoType) {
-            this.videoType = videoType;
             if (videoType === "youtube") {
                this.$modal.show("youtube-link");
                return;
@@ -256,16 +301,20 @@
             return window.moment(date).format('MMMM Do YYYY, h:mm:ss a');
          },
          addVideo() {
-            this.$store.dispatch("createVideo").then(() => {
-               this.$fire({
-                  title: "Video Created Successfully",
-                  type: "success",
-                  timer: 3000
-               }).then(() => {
-                  window.location.href = "/";
-               });
+            this.$v.$touch();
+            if(!this.$v.$invalid) {
+               console.log("valid");
+               this.$store.dispatch("createVideo").then(() => {
+                  this.$fire({
+                     title: "Video Created Successfully",
+                     type: "success",
+                     timer: 3000
+                  }).then(() => {
+                     window.location.href = "/";
+                  });
 
-            })
+               })
+            }
          }
       },
       watch: {
@@ -346,5 +395,8 @@
 
      .w-100 {
           width: 100%;
+     }
+     .invalid {
+          color: #dc3545;
      }
 </style>

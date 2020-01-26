@@ -8,6 +8,11 @@ import VueSimpleAlert from "vue-simple-alert";
 
 Vue.use(VueSimpleAlert);
 
+import Vuelidate from 'vuelidate'
+Vue.use(Vuelidate)
+
+window.bus = new Vue();
+
 import VModal from 'vue-js-modal'
 
 Vue.use(VModal);
